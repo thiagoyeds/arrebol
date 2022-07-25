@@ -97,12 +97,13 @@ public class DockerTaskExecutor implements TaskExecutor {
 
     private ContainerSpecification createContainerSpecification(Task task) {
         Map<String, String> requirements = task.getTaskSpec().getRequirements();
-        ContainerSpecification containerSpecification = new ContainerSpecification(defaultImageId, requirements);
-        if( Objects.nonNull(requirements)){
+        Map<String, String> envVars = task.getTaskSpec().getEnvVars();
+        ContainerSpecification containerSpecification = new ContainerSpecification(defaultImageId, requirements, envVars);
+        if(Objects.nonNull(requirements)){
             String imageId = requirements.get(RequirementsContants.IMAGE_KEY);
             if(Objects.nonNull(imageId)){
                 containerSpecification =
-                    new ContainerSpecification(imageId, requirements);
+                    new ContainerSpecification(imageId, requirements, envVars);
             }
         }
         return containerSpecification;

@@ -3,15 +3,15 @@
   "properties": [
     {
       "key":"workerPoolSize",
-      "value": 5
+      "value": 1
     },
     {
       "key": "imageId",
-      "value": "wesleymonte/simple-worker"
+      "value": "ubuntu"
     },
     {
       "key": "resourceAddresses",
-      "value": ["http://localhost:5555"]
+      "value": ["http://127.0.0.1:5555"]
     }
   ]
 }

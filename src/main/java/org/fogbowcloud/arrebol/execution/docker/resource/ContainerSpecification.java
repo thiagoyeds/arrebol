@@ -6,12 +6,16 @@ import java.util.Objects;
 public class ContainerSpecification {
     private String imageId;
     private Map<String, String> requirements;
+    private Map<String, String> envVars;
 
     public ContainerSpecification(){}
 
-    public ContainerSpecification(String imageId, Map<String, String> requirements) {
+    public ContainerSpecification(String imageId, Map<String, String> requirements,
+        Map<String, String> envVars) {
+
         this.imageId = imageId;
         this.requirements = requirements;
+        this.envVars = envVars;
     }
 
     public String getImageId() {
@@ -22,19 +26,23 @@ public class ContainerSpecification {
         return requirements;
     }
 
+    public Map<String, String> getEnvVars() {
+        return envVars;
+    }
+
     @Override
     public String toString() {
         return "{" + "imageId='" + imageId + '\'' + ", requirements="
-            + toStringRequirements() + '}';
+            + mapToString(requirements) + ", envVars=" + mapToString(envVars) + '}';
     }
 
-    private String toStringRequirements() {
+    private String mapToString(Map<String, String> map) {
         StringBuilder mapAsString = new StringBuilder("{");
-        if(!Objects.isNull(requirements)){
-            for (String key : requirements.keySet()) {
-                mapAsString.append(key + "=" + requirements.get(key) + ", ");
+        if(!Objects.isNull(map)){
+            for (String key : map.keySet()) {
+                mapAsString.append(key + "=" + map.get(key) + ", ");
             }
-            if(!requirements.isEmpty()){
+            if(!map.isEmpty()){
                 mapAsString.delete(mapAsString.length()-2, mapAsString.length());
             }
         }

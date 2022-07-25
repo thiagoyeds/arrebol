@@ -10,9 +10,11 @@ import org.fogbowcloud.arrebol.execution.docker.exceptions.DockerStartException;
 import org.fogbowcloud.arrebol.execution.docker.request.HttpWrapper;
 import org.fogbowcloud.arrebol.utils.AppUtil;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.fogbowcloud.arrebol.execution.docker.constants.DockerConstants;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class DockerContainerRequestHelper {
@@ -26,9 +28,9 @@ public class DockerContainerRequestHelper {
         this.containerName = containerName;
     }
 
-    public String createContainer(String image, Map<String, String> requirements) throws DockerCreateContainerException, UnsupportedEncodingException {
+    public String createContainer(String image, Map<String, String> requirements, Map<String, String> environmentVariables) throws DockerCreateContainerException, UnsupportedEncodingException {
         final String endPoint = String.format("%s/containers/create?name=%s", address, containerName);
-        StringEntity body = jsonCreateContainer(image, requirements);
+        StringEntity body = jsonCreateContainer(image, requirements, environmentVariables);
         String containerId = createContainerRequest(endPoint, body);
         return containerId;
         //Todo catch and throw or threat possible exceptions
@@ -78,12 +80,13 @@ public class DockerContainerRequestHelper {
         return HttpWrapper.doRequest(HttpPost.METHOD_NAME, endpoint);
     }
 
-    private StringEntity jsonCreateContainer(String image, Map<String, String> requirements) throws UnsupportedEncodingException {
+    private StringEntity jsonCreateContainer(String image, Map<String, String> requirements, Map<String, String> environemntVariables) throws UnsupportedEncodingException {
         JSONObject jsonObject = new JSONObject();
         AppUtil.makeBodyField(jsonObject, "Image", image);
         AppUtil.makeBodyField(jsonObject, "Tty", true);
         //AppUtil.makeBodyField(jsonObject, "HostConfig", requirements);
         jsonAddRequirements(jsonObject, requirements);
+        jsonAddEnvironmentVariables(jsonObject, environemntVariables);
         return new StringEntity(jsonObject.toString());
     }
 
@@ -101,7 +104,27 @@ public class DockerContainerRequestHelper {
                     break;
             }
         }
+
+        JSONArray bindsJsonArray = new JSONArray();
+        bindsJsonArray.put("/nfs:/nfs");
+        jsonRequirements.put("Binds", bindsJsonArray);
+
         AppUtil.makeBodyField(jsonObject, "HostConfig", jsonRequirements);
+    }
+
+    private void jsonAddEnvironmentVariables(JSONObject jsonObject, Map<String, String> environmentVariables) {
+        ArrayList<String> envVarsList = new ArrayList<String>();
+        String key, value, envVar;
+
+        for(Map.Entry<String, String> entry : environmentVariables.entrySet()){
+            key = entry.getKey();
+            value = entry.getValue();
+            envVar = String.format("%s=%s", key, value);
+
+            envVarsList.add(envVar);
+        }
+        
+        AppUtil.makeBodyField(jsonObject, "Env", envVarsList);
     }
 
     public String getAddress() {

@@ -62,7 +62,8 @@ public class DefaultDockerContainerResource implements DockerContainerResource {
         String image = this.setUpImage(containerSpecification.getImageId());
         Map<String, String> containerRequirements =
                 this.getDockerContainerRequirements(containerSpecification.getRequirements());
-        this.dockerContainerRequestHelper.createContainer(image, containerRequirements);
+        Map<String, String> containerVarEnvs = containerSpecification.getEnvVars();
+        this.dockerContainerRequestHelper.createContainer(image, containerRequirements, containerVarEnvs);
         this.dockerContainerRequestHelper.startContainer();
         this.started = true;
         LOGGER.info("Started the container " + this.resourceId);

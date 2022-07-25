@@ -1,5 +1,6 @@
 package org.fogbowcloud.arrebol.models.task;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
@@ -9,6 +10,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.Valid;
@@ -27,8 +29,12 @@ public class TaskSpec implements Serializable {
     @JsonIgnore
     private Long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> requirements;
+
+    @ElementCollection
+    @JsonProperty("env_vars")
+    private Map<String, String> envVars;
 
     @Valid
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -38,12 +44,15 @@ public class TaskSpec implements Serializable {
             message = "Commands list may not be smaller than one and greater than 10000")
     private List<Command> commands;
 
-    @ElementCollection private Map<String, String> metadata;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, String> metadata;
 
     public TaskSpec(
-            Long id, Map<String, String> requirements, List<Command> commands, Map<String, String> metadata) {
+            Long id, Map<String, String> requirements, Map<String, String> envVars,
+            List<Command> commands, Map<String, String> metadata) {
         this.id = id;
         this.requirements = requirements;
+        this.envVars = envVars;
         this.commands = commands;
         this.metadata = metadata;
     }
@@ -72,13 +81,20 @@ public class TaskSpec implements Serializable {
         return requirements;
     }
 
+    public Map<String, String> getEnvVars() {
+        return envVars;
+    }
+
     public Map<String, String> getMetadata() {
         return this.metadata;
     }
 
     @Override
     public String toString() {
-        return "TaskSpec{" + "id='" + id + '\'' + ", requirements=" + requirements + ", commands="
-            + commands + ", metadata=" + metadata + '}';
+        return "TaskSpec{" + "id='" + id + '\'' +
+            ", envVars=" + envVars +
+            ", requirements=" + requirements +
+            ", commands=" + commands +
+            ", metadata=" + metadata + '}';
     }
 }
